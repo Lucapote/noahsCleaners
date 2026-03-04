@@ -3,7 +3,6 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLanguage } from '../context/LanguageContext';
-import { useBrevo } from '../hooks/useBrevo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,37 +12,12 @@ export default function ContactForm() {
     const [diagnosticResult, setDiagnosticResult] = useState(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    // Utiliza variables de entorno de Vite para proteger la llave en el repositorio público
-    const brevoApiKey = import.meta.env.VITE_BREVO_API_KEY || '';
-    const { submitContact, isSubmitting, submitError, setSubmitError } = useBrevo(brevoApiKey);
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setSubmitError(null);
 
         const formData = new FormData(e.target);
         const problems = formData.getAll('problemas');
         const numProblems = problems.length;
-
-        // IMPORTANTE: Los nombres del formData.get() deben coincidir exactamente
-        // con los atributos 'name' del HTML (ej. 'nombre' en vez de 'name').
-        const payload = {
-            email: formData.get('email'),
-            sms: formData.get('telefono'),
-            fullName: formData.get('nombre'),
-            propertyType: formData.get('property_type'),
-            ventsAmount: formData.get('rejillas'),
-            lastClean: formData.get('last_cleaned'),
-            zipCode: formData.get('zipcode'),
-            issues: problems
-        };
-
-        const result = await submitContact(payload);
-
-        if (!result.success) {
-            setSubmitError(t('contactForm.submitErrorMsg'));
-            return;
-        }
 
         let status, title, message, colorClass, icon, headerBgClass;
 
@@ -223,17 +197,9 @@ export default function ContactForm() {
                             <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-4">
                                 <p className="text-xs text-gray-400 text-center md:text-left">{t('contactForm.secureText')}</p>
 
-                                <div className="w-full md:w-auto text-end flex flex-col items-center md:items-end">
-                                    {submitError && <p className="text-red-500 text-sm mb-2 font-bold">{submitError}</p>}
-                                    <button disabled={isSubmitting} className="bg-primary hover:bg-green-600 disabled:bg-gray-400 text-white font-bold py-3 px-8 rounded shadow-lg transition duration-200 w-full md:w-auto" type="submit">
-                                        {isSubmitting ? (
-                                            <span className="flex items-center gap-2 justify-center">
-                                                <span className="material-icons-outlined animate-spin text-lg">sync</span>
-                                                {t('contactForm.btnSending')}
-                                            </span>
-                                        ) : t('contactForm.submitBtn')}
-                                    </button>
-                                </div>
+                                <button className="bg-primary hover:bg-green-600 text-white font-bold py-3 px-8 rounded shadow-lg transition duration-200 w-full md:w-auto" type="submit">
+                                    {t('contactForm.submitBtn')}
+                                </button>
                             </div>
                         </form>
                     </div>
