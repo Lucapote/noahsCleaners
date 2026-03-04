@@ -54,7 +54,7 @@ export default function Testimonials() {
                 <div className="testimonial-card max-w-5xl mx-auto flex flex-col md:flex-row bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                     <div className="md:w-1/2 relative h-64 md:h-auto">
                         <div className="absolute inset-0 flex">
-                            <img alt="Ducto antes y despues" className="w-full h-full object-cover border-r border-white/20" src="./public/img/vent-1.webp" />
+                            <img alt="Ducto antes y despues" className="w-full h-full object-cover border-r border-white/20" src="./img/vent-1.webp" />
                         </div>
                     </div>
                     <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative">
