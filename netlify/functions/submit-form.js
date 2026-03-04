@@ -21,23 +21,17 @@ export const handler = async (event) => {
     try {
         const data = JSON.parse(event.body);
 
-        // Brevo requires strict international format. Dummy numbers (e.g., "12345") will be hard-rejected by Brevo.
-        let rawPhone = data.sms ? data.sms.trim() : '';
-        let formattedPhone = '';
-        if (rawPhone) {
-            const numericPhone = rawPhone.replace(/\D/g, '');
-            if (numericPhone) {
-                if (rawPhone.startsWith('+')) {
-                    formattedPhone = '+' + numericPhone;
-                } else if (numericPhone.length === 10) {
-                    formattedPhone = '+1' + numericPhone; // Assume US/Canada
-                } else if (numericPhone.length > 10 && numericPhone.startsWith('1')) {
-                    formattedPhone = '+' + numericPhone;
-                } else {
-                    formattedPhone = '+' + numericPhone;
-                }
-            }
-        }
+        // Formateador de teléfono provisto por el usuario (Adaptado a +1 Estados Unidos)
+        const formatPhoneNumber = (phone) => {
+            if (!phone) return "";
+            const cleanPhone = phone.replace(/\D/g, '');
+            if (cleanPhone.startsWith('1')) return `+${cleanPhone}`;
+            if (cleanPhone.length === 10) return `+1${cleanPhone}`;
+            if (phone.startsWith('+')) return phone;
+            return `+1${cleanPhone}`;
+        };
+
+        const formattedPhone = formatPhoneNumber(data.sms);
 
         // Mapear los datos al formato que espera Brevo
         const payload = {
@@ -46,6 +40,7 @@ export const handler = async (event) => {
             updateEnabled: true,
             attributes: {
                 FULL_NAME: data.fullName || '',
+                SMS: formattedPhone,
                 PROPERTY_TYPE: data.propertyType || '',
                 VENTS_AMOUNT: data.ventsAmount || '',
                 LAST_CLEAN: data.lastClean || '',
@@ -53,10 +48,6 @@ export const handler = async (event) => {
                 ISSUES: data.issues ? data.issues.join(', ') : '',
             },
         };
-
-        if (formattedPhone) {
-            payload.attributes.SMS = formattedPhone;
-        }
 
         console.log("Payload sent to Brevo:", JSON.stringify(payload));
 
