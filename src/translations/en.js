@@ -109,6 +109,8 @@ export const en = {
         emailPlaceholder: "Email Address",
         secureText: "Your data is 100% secure. We do not spam.",
         submitBtn: "I want the diagnosis",
+        btnSending: "Sending...",
+        submitErrorMsg: "There was a network error sending the form. Please try again.",
         resultUrgentTitle: "Urgent Check Recommended",
         resultUrgentMsg: "We will contact you shortly. Based on your answers, your HVAC system likely has significant contamination.",
         resultWarningTitle: "Check Recommended",
@@ -118,6 +120,7 @@ export const en = {
     },
     footer: {
         copyright: "© 2026 Noah's Cleaners. All rights reserved.",
-        serviceArea: "Serving Orlando, Kissimmee, Winter Park and surrounding areas."
+        serviceArea: "Proudly serving the Orlando, FL area.",
+        callUs: "Call us:"
     }
 };

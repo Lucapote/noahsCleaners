@@ -54,7 +54,7 @@ export default function Testimonials() {
                 <div className="testimonial-card max-w-5xl mx-auto flex flex-col md:flex-row bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                     <div className="md:w-1/2 relative h-64 md:h-auto">
                         <div className="absolute inset-0 flex">
-                            <img alt="Ducto antes y despues" className="w-full h-full object-cover border-r border-white/20" src="./img/vent-1.webp" />
+                            <img alt="Before and after air duct cleaning in Orlando homes" className="w-full h-full object-cover border-r border-white/20" src="./img/vent-1.webp" />
                         </div>
                     </div>
                     <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative">
@@ -63,7 +63,7 @@ export default function Testimonials() {
                             {t('testimonials.quote')}
                         </blockquote>
                         <div className="flex items-center gap-4">
-                            <img alt="Maria Gonzalez" className="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx8Rx9PkufH_D8EATAhoy8lH1tSGwGHUQtp8AQZJgXUdPVITfKTF4yxqr8hpVqYR7AkWhSkBp4d0bU5XngGimirYclLh4ma2ogxcFP1OZk4YQsIGECuYUj8CALAh7iQYKSbqEaikApr_HH1WhT9EkD5AUh2trw7gC00GHnMEd34ySBb88W6RlsFSUYZTZr1VU9KnBiPlXFFAE31s8KnXgCi8fNurnMdpWC8-HkXFUnHfSh9bBDrXF0KqJ5IhZNF1lz4FCM5FuZACTX" />
+                            <img alt="Satisfied customer of Orlando duct cleaning service" className="w-12 h-12 rounded-full object-cover" src="./img/review.webp" />
                             <div>
                                 <h4 className="font-bold text-gray-900">{t('testimonials.author')}</h4>
                                 <p className="text-xs text-gray-500">{t('testimonials.location')}</p>

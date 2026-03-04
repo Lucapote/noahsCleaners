@@ -5,7 +5,7 @@ export default function WhatsAppButton() {
             href="https://wa.me/13215022611"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Chat on WhatsApp"
+            aria-label="Contact Noah's Cleaners in Orlando via WhatsApp"
         >
             <i className="fab fa-whatsapp text-3xl"></i>
         </a>

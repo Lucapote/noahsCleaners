@@ -47,7 +47,7 @@ export default function Hero() {
     return (
         <section ref={container} className="relative pt-32 pb-24 md:pt-48 md:pb-32 bg-gray-900 overflow-hidden h-screen">
             <div className="absolute inset-0 z-0">
-                <img alt="Familia feliz en sala limpia" className="hero-bg w-full h-full object-cover opacity-60" src="./img/portada.webp" />
+                <img alt="Professional air duct cleaning services in Orlando, FL - Noah's Cleaners" className="hero-bg w-full h-full object-cover opacity-60" src="./img/portada.webp" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
             </div>
             <div className="container mx-auto px-4 relative z-10 text-center">
