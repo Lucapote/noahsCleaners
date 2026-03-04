@@ -53,7 +53,7 @@ export const useBrevo = () => {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Api-Key': BREVO_API_KEY
+                    'Api-Key': import.meta.env.VITE_BREVO_API_KEY
                 },
                 body: JSON.stringify(bodyPayload)
             });
