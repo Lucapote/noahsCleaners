@@ -11,41 +11,75 @@ export default function ContactForm() {
     const container = useRef();
     const [diagnosticResult, setDiagnosticResult] = useState(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState(null);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        setSubmitError(null);
 
         const formData = new FormData(e.target);
         const problems = formData.getAll('problemas');
         const numProblems = problems.length;
 
-        let status, title, message, colorClass, icon, headerBgClass;
+        const payload = {
+            email: formData.get('email'),
+            sms: formData.get('telefono'),
+            fullName: formData.get('nombre'),
+            propertyType: formData.get('property_type'),
+            ventsAmount: formData.get('rejillas'),
+            lastClean: formData.get('last_cleaned'),
+            zipCode: formData.get('zipcode'),
+            issues: problems
+        };
 
-        if (numProblems >= 2) {
-            status = 'urgent';
-            title = t('contactForm.resultUrgentTitle');
-            message = t('contactForm.resultUrgentMsg');
-            colorClass = 'bg-red-50 text-red-800 border-red-200';
-            headerBgClass = 'bg-red-500';
-            icon = 'error_outline';
-        } else if (numProblems === 1) {
-            status = 'warning';
-            title = t('contactForm.resultWarningTitle');
-            message = t('contactForm.resultWarningMsg');
-            colorClass = 'bg-yellow-50 text-yellow-800 border-yellow-200';
-            headerBgClass = 'bg-yellow-500';
-            icon = 'warning_amber';
-        } else {
-            status = 'good';
-            title = t('contactForm.resultGoodTitle');
-            message = t('contactForm.resultGoodMsg');
-            colorClass = 'bg-green-50 text-green-800 border-green-200';
-            headerBgClass = 'bg-green-500';
-            icon = 'check_circle_outline';
+        try {
+            const response = await fetch('/.netlify/functions/submit-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Endpoint Error:', errorData);
+                throw new Error('Error enviando datos (Netlify Function)');
+            }
+
+            let status, title, message, colorClass, icon, headerBgClass;
+
+            if (numProblems >= 2) {
+                status = 'urgent';
+                title = t('contactForm.resultUrgentTitle');
+                message = t('contactForm.resultUrgentMsg');
+                colorClass = 'bg-red-50 text-red-800 border-red-200';
+                headerBgClass = 'bg-red-500';
+                icon = 'error_outline';
+            } else if (numProblems === 1) {
+                status = 'warning';
+                title = t('contactForm.resultWarningTitle');
+                message = t('contactForm.resultWarningMsg');
+                colorClass = 'bg-yellow-50 text-yellow-800 border-yellow-200';
+                headerBgClass = 'bg-yellow-500';
+                icon = 'warning_amber';
+            } else {
+                status = 'good';
+                title = t('contactForm.resultGoodTitle');
+                message = t('contactForm.resultGoodMsg');
+                colorClass = 'bg-green-50 text-green-800 border-green-200';
+                headerBgClass = 'bg-green-500';
+                icon = 'check_circle_outline';
+            }
+
+            setDiagnosticResult({ status, title, message, colorClass, headerBgClass, icon });
+            setIsSubmitted(true);
+        } catch (error) {
+            console.error(error);
+            setSubmitError(t('contactForm.submitErrorMsg'));
+        } finally {
+            setIsSubmitting(false);
         }
-
-        setDiagnosticResult({ status, title, message, colorClass, headerBgClass, icon });
-        setIsSubmitted(true);
     };
 
     useGSAP(() => {
@@ -197,9 +231,17 @@ export default function ContactForm() {
                             <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-4">
                                 <p className="text-xs text-gray-400 text-center md:text-left">{t('contactForm.secureText')}</p>
 
-                                <button className="bg-primary hover:bg-green-600 text-white font-bold py-3 px-8 rounded shadow-lg transition duration-200 w-full md:w-auto" type="submit">
-                                    {t('contactForm.submitBtn')}
-                                </button>
+                                <div className="w-full md:w-auto text-end flex flex-col items-center md:items-end">
+                                    {submitError && <p className="text-red-500 text-sm mb-2 font-bold">{submitError}</p>}
+                                    <button disabled={isSubmitting} className="bg-primary hover:bg-green-600 disabled:bg-gray-400 text-white font-bold py-3 px-8 rounded shadow-lg transition duration-200 w-full md:w-auto" type="submit">
+                                        {isSubmitting ? (
+                                            <span className="flex items-center gap-2 justify-center">
+                                                <span className="material-icons-outlined animate-spin text-lg">sync</span>
+                                                {t('contactForm.btnSending')}
+                                            </span>
+                                        ) : t('contactForm.submitBtn')}
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
