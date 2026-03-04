@@ -21,14 +21,22 @@ export const handler = async (event) => {
     try {
         const data = JSON.parse(event.body);
 
-        // Brevo requires international format for SMS/Phone numbers (e.g., +13215022611)
-        // Strip non-digits and prepend +1 if missing for US contacts
-        let formattedPhone = data.sms ? data.sms.replace(/\D/g, '') : '';
-        if (formattedPhone && !formattedPhone.startsWith('1')) {
-            formattedPhone = '1' + formattedPhone;
-        }
-        if (formattedPhone) {
-            formattedPhone = '+' + formattedPhone;
+        // Brevo requires strict international format. Dummy numbers (e.g., "12345") will be hard-rejected by Brevo.
+        let rawPhone = data.sms ? data.sms.trim() : '';
+        let formattedPhone = '';
+        if (rawPhone) {
+            const numericPhone = rawPhone.replace(/\D/g, '');
+            if (numericPhone) {
+                if (rawPhone.startsWith('+')) {
+                    formattedPhone = '+' + numericPhone;
+                } else if (numericPhone.length === 10) {
+                    formattedPhone = '+1' + numericPhone; // Assume US/Canada
+                } else if (numericPhone.length > 10 && numericPhone.startsWith('1')) {
+                    formattedPhone = '+' + numericPhone;
+                } else {
+                    formattedPhone = '+' + numericPhone;
+                }
+            }
         }
 
         // Mapear los datos al formato que espera Brevo
@@ -38,7 +46,6 @@ export const handler = async (event) => {
             updateEnabled: true,
             attributes: {
                 FULL_NAME: data.fullName || '',
-                SMS: formattedPhone || '',
                 PROPERTY_TYPE: data.propertyType || '',
                 VENTS_AMOUNT: data.ventsAmount || '',
                 LAST_CLEAN: data.lastClean || '',
@@ -46,6 +53,12 @@ export const handler = async (event) => {
                 ISSUES: data.issues ? data.issues.join(', ') : '',
             },
         };
+
+        if (formattedPhone) {
+            payload.attributes.SMS = formattedPhone;
+        }
+
+        console.log("Payload sent to Brevo:", JSON.stringify(payload));
 
         const response = await fetch('https://api.brevo.com/v3/contacts', {
             method: 'POST',
