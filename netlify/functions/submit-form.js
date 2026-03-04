@@ -21,6 +21,16 @@ export const handler = async (event) => {
     try {
         const data = JSON.parse(event.body);
 
+        // Brevo requires international format for SMS/Phone numbers (e.g., +13215022611)
+        // Strip non-digits and prepend +1 if missing for US contacts
+        let formattedPhone = data.sms ? data.sms.replace(/\D/g, '') : '';
+        if (formattedPhone && !formattedPhone.startsWith('1')) {
+            formattedPhone = '1' + formattedPhone;
+        }
+        if (formattedPhone) {
+            formattedPhone = '+' + formattedPhone;
+        }
+
         // Mapear los datos al formato que espera Brevo
         const payload = {
             email: data.email,
@@ -28,7 +38,7 @@ export const handler = async (event) => {
             updateEnabled: true,
             attributes: {
                 FULL_NAME: data.fullName || '',
-                SMS: data.sms || '',
+                SMS: formattedPhone || '',
                 PROPERTY_TYPE: data.propertyType || '',
                 VENTS_AMOUNT: data.ventsAmount || '',
                 LAST_CLEAN: data.lastClean || '',
