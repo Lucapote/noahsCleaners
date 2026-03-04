@@ -32,23 +32,27 @@ export const useBrevo = () => {
         try {
             const formattedPhone = formatPhoneNumber(contactData.sms);
 
-            // Mapear exactamente las keys de la imagen provista
+            const attributes = {
+                FULL_NAME: contactData.fullName || "",
+                PROPERTY_TYPE: contactData.propertyType || "",
+                VENTS_AMOUNT: contactData.ventsAmount || "",
+                LAST_CLEAN: contactData.lastClean || "",
+                ZIP_CODE: contactData.zipCode ? parseInt(contactData.zipCode, 10) || 0 : 0,
+                ISSUES: contactData.issues ? contactData.issues.join(', ') : ""
+            };
+
+            if (formattedPhone && formattedPhone.length > 5) {
+                attributes.SMS = formattedPhone;
+            }
+
             const bodyPayload = {
                 email: contactData.email,
-                attributes: {
-                    FULL_NAME: contactData.fullName || "",
-                    SMS: formattedPhone,
-                    PROPERTY_TYPE: contactData.propertyType || "",
-                    VENTS_AMOUNT: contactData.ventsAmount || "",
-                    LAST_CLEAN: contactData.lastClean || "",
-                    ZIP_CODE: contactData.zipCode ? parseInt(contactData.zipCode, 10) : 0,
-                    ISSUES: contactData.issues ? contactData.issues.join(', ') : ""
-                },
+                attributes: attributes,
                 listIds: [5],
                 updateEnabled: true
             };
 
-            const response = await fetch('https://api.brevo.com/v3/contacts', {
+            let response = await fetch('https://api.brevo.com/v3/contacts', {
                 method: "POST",
                 headers: {
                     'Accept': 'application/json',
@@ -58,21 +62,48 @@ export const useBrevo = () => {
                 body: JSON.stringify(bodyPayload)
             });
 
-            if (response.ok) {
-                setIsSuccess(true);
-                return { success: true };
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                console.error("Error de Brevo", errorData);
+            if (!response.ok) {
+                let errorData = await response.json().catch(() => ({}));
 
-                if (errorData.code === 'invalid_parameter' && errorData.message?.includes('phone')) {
-                    setMessage("El número de teléfono no es válido. Por favor, revisa que esté correcto.");
-                } else {
-                    setMessage("Hubo un error al enviar el formulario. Por favor, intenta de nuevo.");
+                // Si Brevo rechaza específicamente el teléfono (por ser falso en las pruebas o malformado),
+                // reintentamos inmediatamente sin el teléfono para no perder al cliente.
+                if (errorData.code === 'invalid_parameter' && errorData.message?.toLowerCase().includes('phone')) {
+                    console.warn("Retrying without SMS due to strict validation: ", errorData.message);
+                    delete bodyPayload.attributes.SMS;
+
+                    response = await fetch('https://api.brevo.com/v3/contacts', {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Api-Key': import.meta.env.VITE_BREVO_API_KEY
+                        },
+                        body: JSON.stringify(bodyPayload)
+                    });
+
+                    if (!response.ok) {
+                        errorData = await response.json().catch(() => ({}));
+                    }
                 }
-                setIsSuccess(false);
-                return { success: false, error: errorData };
+
+                // Si incluso después del reintento falló, devolvemos el error al usuario
+                if (!response.ok) {
+                    console.error("Error de Brevo definitivo", errorData);
+
+                    if (errorData.code === 'invalid_parameter' && errorData.message?.includes('phone')) {
+                        setMessage("El número de teléfono no es válido.");
+                    } else if (errorData.code === 'duplicate_parameter') {
+                        setMessage("Este correo ya ha sido registrado recientemente.");
+                    } else {
+                        setMessage("Hubo un error al enviar el formulario. Intenta de nuevo.");
+                    }
+                    setIsSuccess(false);
+                    return { success: false, error: errorData };
+                }
             }
+
+            setIsSuccess(true);
+            return { success: true };
         } catch (error) {
             console.error("Error de conexión: ", error);
             setMessage("Error de conexión. Verifica tu internet e intenta nuevamente.");
