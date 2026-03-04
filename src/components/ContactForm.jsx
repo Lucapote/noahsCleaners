@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLanguage } from '../context/LanguageContext';
+import { useBrevo } from '../hooks/useBrevo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,22 +12,25 @@ export default function ContactForm() {
     const container = useRef();
     const [diagnosticResult, setDiagnosticResult] = useState(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitError, setSubmitError] = useState(null);
+
+    // Utiliza variables de entorno de Vite para proteger la llave en el repositorio público
+    const brevoApiKey = import.meta.env.VITE_BREVO_API_KEY || '';
+    const { submitContact, isSubmitting, submitError, setSubmitError } = useBrevo(brevoApiKey);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
         setSubmitError(null);
 
         const formData = new FormData(e.target);
         const problems = formData.getAll('problemas');
         const numProblems = problems.length;
 
+        // IMPORTANTE: Los nombres del formData.get() deben coincidir exactamente
+        // con los atributos 'name' del HTML (ej. 'nombre' en vez de 'name').
         const payload = {
             email: formData.get('email'),
-            sms: formData.get('phone'),
-            fullName: formData.get('name'),
+            sms: formData.get('telefono'),
+            fullName: formData.get('nombre'),
             propertyType: formData.get('property_type'),
             ventsAmount: formData.get('rejillas'),
             lastClean: formData.get('last_cleaned'),
@@ -34,50 +38,40 @@ export default function ContactForm() {
             issues: problems
         };
 
-        try {
-            const response = await fetch('/.netlify/functions/submit-form', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+        const result = await submitContact(payload);
 
-            if (!response.ok) {
-                throw new Error('Error enviando formulario a Brevo');
-            }
-
-            let status, title, message, colorClass, icon, headerBgClass;
-
-            if (numProblems >= 2) {
-                status = 'urgent';
-                title = t('contactForm.resultUrgentTitle');
-                message = t('contactForm.resultUrgentMsg');
-                colorClass = 'bg-red-50 text-red-800 border-red-200';
-                headerBgClass = 'bg-red-500';
-                icon = 'error_outline';
-            } else if (numProblems === 1) {
-                status = 'warning';
-                title = t('contactForm.resultWarningTitle');
-                message = t('contactForm.resultWarningMsg');
-                colorClass = 'bg-yellow-50 text-yellow-800 border-yellow-200';
-                headerBgClass = 'bg-yellow-500';
-                icon = 'warning_amber';
-            } else {
-                status = 'good';
-                title = t('contactForm.resultGoodTitle');
-                message = t('contactForm.resultGoodMsg');
-                colorClass = 'bg-green-50 text-green-800 border-green-200';
-                headerBgClass = 'bg-green-500';
-                icon = 'check_circle_outline';
-            }
-
-            setDiagnosticResult({ status, title, message, colorClass, headerBgClass, icon });
-            setIsSubmitted(true);
-        } catch (error) {
-            console.error(error);
+        if (!result.success) {
             setSubmitError(t('contactForm.submitErrorMsg'));
-        } finally {
-            setIsSubmitting(false);
+            return;
         }
+
+        let status, title, message, colorClass, icon, headerBgClass;
+
+        if (numProblems >= 2) {
+            status = 'urgent';
+            title = t('contactForm.resultUrgentTitle');
+            message = t('contactForm.resultUrgentMsg');
+            colorClass = 'bg-red-50 text-red-800 border-red-200';
+            headerBgClass = 'bg-red-500';
+            icon = 'error_outline';
+        } else if (numProblems === 1) {
+            status = 'warning';
+            title = t('contactForm.resultWarningTitle');
+            message = t('contactForm.resultWarningMsg');
+            colorClass = 'bg-yellow-50 text-yellow-800 border-yellow-200';
+            headerBgClass = 'bg-yellow-500';
+            icon = 'warning_amber';
+        } else {
+            status = 'good';
+            title = t('contactForm.resultGoodTitle');
+            message = t('contactForm.resultGoodMsg');
+            colorClass = 'bg-green-50 text-green-800 border-green-200';
+            headerBgClass = 'bg-green-500';
+            icon = 'check_circle_outline';
+        }
+
+        setDiagnosticResult({ status, title, message, colorClass, headerBgClass, icon });
+        setIsSubmitted(true);
     };
 
     useGSAP(() => {
