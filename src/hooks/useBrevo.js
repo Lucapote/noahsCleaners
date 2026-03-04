@@ -44,7 +44,7 @@ export const useBrevo = () => {
                     ZIP_CODE: contactData.zipCode ? parseInt(contactData.zipCode, 10) : 0,
                     ISSUES: contactData.issues ? contactData.issues.join(', ') : ""
                 },
-                listIds: [BREVO_LIST_ID],
+                listIds: [5],
                 updateEnabled: true
             };
 
