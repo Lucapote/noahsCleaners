@@ -44,7 +44,7 @@ export const useBrevo = () => {
                     ZIP_CODE: contactData.zipCode ? parseInt(contactData.zipCode, 10) : 0,
                     ISSUES: contactData.issues ? contactData.issues.join(', ') : ""
                 },
-                listIds: [5],
+                listIds: [BREVO_LIST_ID],
                 updateEnabled: true
             };
 
@@ -53,7 +53,7 @@ export const useBrevo = () => {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Api-Key': import.meta.env.VITE_BREVO_API_KEY
+                    'Api-Key': BREVO_API_KEY
                 },
                 body: JSON.stringify(bodyPayload)
             });
