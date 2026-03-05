@@ -74,6 +74,34 @@ export const useBrevo = () => {
                 return { success: false, error: errorData };
             }
 
+            // Enviar notificación silenciosa por EmailJS
+            const emailParams = {
+                name: contactData.fullName || "",
+                phone_number: contactData.sms || "",
+                email: contactData.email || "",
+                last_clean: contactData.lastClean || "",
+                property_type: contactData.propertyType || "",
+                issues: contactData.issues ? contactData.issues.join(', ') : "",
+                vents_amount: contactData.ventsAmount || "",
+                zip_code: contactData.zipCode || ""
+            };
+
+            // Se envía sin `await` para que sea "silencioso" y no bloquee el retorno exitoso del formulario
+            fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    service_id: 'service_agtt0ko',
+                    template_id: 'template_amknf0j',
+                    user_id: 'zono5eCPGtLZQSlpX',
+                    template_params: emailParams
+                })
+            }).catch(error => {
+                console.error("Error enviando notificación silenciosa por EmailJS:", error);
+            });
+
             setIsSuccess(true);
             return { success: true };
         } catch (error) {
