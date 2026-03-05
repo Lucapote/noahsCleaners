@@ -21,9 +21,9 @@ export default function Header() {
 
                 {/* Botones Desktop */}
                 <div className="hidden md:flex items-center space-x-4">
-                    <button className="bg-secondary hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow transition duration-200 text-sm">
+                    <a href="#diagnostico" className="bg-secondary hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow transition duration-200 text-sm w-fit text-center">
                         {t('header.cta')}
-                    </button>
+                    </a>
                     <button onClick={toggleLanguage} className="text-sm font-bold text-gray-700">{t('header.langToggle')}</button>
                 </div>
 
@@ -46,9 +46,9 @@ export default function Header() {
                     <a onClick={() => setIsMenuOpen(false)} className="text-gray-600 hover:text-secondary font-medium" href="#testimonios">{t('header.testimonials')}</a>
 
                     <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
-                        <button className="bg-secondary hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded shadow transition duration-200 text-sm w-full max-w-[250px]">
+                        <a href="#diagnostico" onClick={() => setIsMenuOpen(false)} className="bg-secondary hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded shadow transition duration-200 text-sm w-full max-w-[250px] text-center">
                             {t('header.cta')}
-                        </button>
+                        </a>
                         <button onClick={toggleLanguage} className="text-sm font-bold text-gray-700 text-left py-2">{t('header.langToggle')}</button>
                     </div>
                 </div>
