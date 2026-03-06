@@ -31,7 +31,7 @@ export default function LocalBanner() {
                 delay: 2.5 // Tiempo visible
             });
 
-    }, { scope: container, dependencies: [index, messages] });
+    }, { scope: container, dependencies: [index] });
 
     return (
         <div ref={container} className="bg-yellow-100 py-6 overflow-hidden">
